@@ -1,0 +1,10 @@
+{
+  "$comment": "Registry of known contextkit sub-modules. `contextkit add <name>` resolves names here; any git URL also works. Each module is its own git repository following the module contract (docs/modules.md).",
+  "modules": {
+    "personal": {
+      "source": "git@github.com:VictorYan1990/contextkit-personal.git",
+      "ref": "main",
+      "description": "Private user profile (rules/USER.md) and personal working rules. Not public."
+    }
+  }
+}

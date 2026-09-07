@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# AI assistants — commit AGENTS.md, CLAUDE.md, skills/, personas/, and the
+# .claude/.cursor symlinks (Claude Code skips skill dirs it detects as gitignored).
+# Ignore only personal/secret files:
+.claude/settings.local.json
+*.local.json
+.cursor/mcp.json
+.ai/
+
+# Working notes for the current task; never part of the toolkit
+prompt.md
+
+# A real user profile never belongs in the central module (see rules/README.md).
+/rules/USER.md
+
+# OS
+.DS_Store

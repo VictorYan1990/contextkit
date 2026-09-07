@@ -1,0 +1,9 @@
+{
+  "name": "{{MODULE_NAME}}",
+  "kind": "module",
+  "version": "0.1.0",
+  "description": "{{MODULE_DESCRIPTION}}",
+  "requires": {
+    "contextkit": ">=0.1.0"
+  }
+}

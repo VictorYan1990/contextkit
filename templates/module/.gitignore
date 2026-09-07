@@ -1,0 +1,8 @@
+# AI assistants: commit skills/, personas/, rules/, knowledge/.
+.claude/settings.local.json
+*.local.json
+.cursor/mcp.json
+.ai/
+prompt.md
+node_modules/
+.DS_Store

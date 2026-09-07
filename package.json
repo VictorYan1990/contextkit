@@ -1,0 +1,39 @@
+{
+  "name": "contextkit",
+  "version": "0.1.0",
+  "description": "Importable context infrastructure for AI coding agents: skills, personas, rules, and knowledge, wired into any repo with one command.",
+  "license": "MIT",
+  "author": "Victor Yan",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VictorYan1990/contextkit.git"
+  },
+  "homepage": "https://github.com/VictorYan1990/contextkit#readme",
+  "keywords": ["ai", "agents", "skills", "claude-code", "cursor", "agents-md", "context"],
+  "type": "commonjs",
+  "bin": {
+    "contextkit": "cli/bin/contextkit.js"
+  },
+  "files": [
+    "cli/",
+    "scripts/",
+    "skills/",
+    "personas/",
+    "rules/",
+    "knowledge/",
+    "templates/",
+    "module.json",
+    "modules.json",
+    "AGENTS.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\"",
+    "validate": "node scripts/validate.js .",
+    "doctor": "node cli/bin/contextkit.js doctor"
+  }
+}
