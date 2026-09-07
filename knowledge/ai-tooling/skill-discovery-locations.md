@@ -30,8 +30,16 @@ Designing contextkit's consumer wiring: the kit is cloned into `.contextkit/`
   the skill once." The page does not mention gitignore filtering.
 - Earlier observation recorded in the `ai-config-discovery` skill: the scanner
   logs `Skipped gitignored skills dir` when the **skills directory itself** is
-  gitignored. Whether a symlink whose *target* is gitignored is skipped was not
-  documented; see the contextkit end-to-end verification.
+  gitignored.
+- **Verified 2026-09-07, Claude Code 2.1.263:** a symlink whose *target* is
+  gitignored is still loaded. In a scratch consumer with
+  `.claude/skills -> ../.agents/skills` and
+  `.agents/skills/<name> -> ../../.contextkit/skills/<name>` (with
+  `.contextkit/` in `.gitignore`), `claude -p` asked to list project skills
+  returned `ai-config-discovery`, `ai-layout-scaffold`, `skill-authoring` — the
+  three Layer 1 skills; the two `disable-model-invocation` skills were absent
+  from the model-visible list as expected. The gitignore check applies to the
+  link path, not the resolved target.
 - Cursor docs, "Agent Skills" (https://cursor.com/docs/context/skills), fetched
   2026-09-07: loads `.agents/skills/`, `.cursor/skills/`, `~/.agents/skills/`,
   `~/.cursor/skills/`; recognises `.claude/skills/` for backward compatibility;
@@ -41,7 +49,10 @@ Designing contextkit's consumer wiring: the kit is cloned into `.contextkit/`
 
 Per-skill symlinks `.agents/skills/<name> -> ../../.contextkit/skills/<name>`
 plus the existing `.claude/skills -> ../.agents/skills` link are a supported
-path for both tools. Keep the link itself (not just its target) un-ignored.
+and now verified path for Claude Code. Keep the link itself un-ignored; the
+target may live in a gitignored directory. `--mode copy` therefore remains a
+Windows-without-Developer-Mode fallback only, not a correctness requirement.
+Cursor was not available on this machine to run the same check.
 
 ## Promote?
 
