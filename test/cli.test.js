@@ -156,13 +156,10 @@ test('new-module scaffolds a valid module repo; validate catches contract violat
   r = ck(['doctor'], dir);
   assert.equal(r.code, 0, r.out);
   write(path.join(dir, 'skills/Bad_Name/SKILL.md'), skill('other-name'));
-  write(path.join(dir, 'rules/USER.md'), 'profile');
   r = ck(['validate', dir], base);
   assert.equal(r.code, 1);
   assert.match(r.out, /not kebab-case/);
   assert.match(r.out, /must equal directory name/);
-  // USER.md is only forbidden in central
-  assert.doesNotMatch(r.out, /USER\.md/);
 });
 
 test('list shows installed modules and the registry', () => {

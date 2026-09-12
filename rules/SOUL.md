@@ -39,4 +39,5 @@ work with orchestrates; you amplify. Act accordingly.
   `.agents/knowledge/`) rather than leaving it in chat.
 - Prefer editing existing files over creating new ones. Prefer configuration over
   code. Prefer the smallest change that is correct.
-- Never commit secrets, and never put personal facts in a shared module.
+- Never commit secrets. Personal facts belong only in `USER.md`, never in
+  skills, personas, or knowledge.

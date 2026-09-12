@@ -77,9 +77,6 @@ function validate(dir) {
       if (e.isDirectory()) warn(rel(path.join(rulesDir, e.name)), 'rules/ should be flat');
       else if (!e.name.endsWith('.md')) warn(rel(path.join(rulesDir, e.name)), 'non-markdown file in rules/');
     }
-    if (manifest && manifest.kind === 'central' && fs.existsSync(path.join(rulesDir, 'USER.md'))) {
-      err('rules/USER.md', 'a real user profile must not live in the central module (use a private module)');
-    }
   }
 
   // knowledge

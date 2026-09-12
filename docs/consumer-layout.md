@@ -28,7 +28,7 @@ my-repo/
   "commit": "3f2a…",
   "mode": "link",
   "modules": {
-    "personal": { "source": "git@github.com:VictorYan1990/contextkit-personal.git", "ref": "main", "commit": "9c1d…" }
+    "python-dev": { "source": "https://github.com/VictorYan1990/contextkit-python-dev.git", "ref": "v0.2.0", "commit": "9c1d…" }
   }
 }
 ```

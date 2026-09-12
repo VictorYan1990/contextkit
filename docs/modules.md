@@ -61,9 +61,11 @@ Tag releases (`v0.2.0`) and bump `module.json`'s `version`. Consumers that pin a
 tag in `ref` only move when they choose to. Consumers that follow `main` move on
 `update`.
 
-## The `personal` module
+## Where the user profile lives
 
-The one module central ships in its registry is `personal`: a private repository
-holding `rules/USER.md` (the real user profile) and any personal working rules.
-Central deliberately gitignores `rules/USER.md` so a profile can never land in a
-public module by accident.
+Central ships `rules/USER.md` with its owner's non-sensitive profile, because
+the kit is single-user and public. If you fork the kit for someone else, replace
+it from `rules/USER.template.md`. If a profile must hold things that should not
+be public, put the fuller version in a private module's `rules/`; the
+consumer's managed block lists every installed module's rules, so the agent
+reads both.

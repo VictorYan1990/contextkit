@@ -9,23 +9,38 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Git identity for scaffold tests
         run: |
           git config --global user.name ci
           git config --global user.email ci@example.com
       - name: Validate the central module
         run: node scripts/validate.js . --strict
-      - name: Tool links are committed as symlinks
+      - name: Tool links are committed as symlinks and not ignored
         run: |
           git ls-files -s .claude .cursor | tee /dev/stderr | awk '$1 != "120000" { bad=1 } END { exit bad }'
-          ! git check-ignore -q .claude/skills
+          if git check-ignore -q .claude/skills; then echo ".claude/skills is gitignored"; exit 1; fi
       - name: Unit and end-to-end tests
         run: npm test
+
+  # The CLI promises Node >= 18; prove install + doctor on the floor versions.
+  compat:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
       - name: Self-install smoke test
         run: |
+          git config --global user.name ci
+          git config --global user.email ci@example.com
           tmp=$(mktemp -d)
           git init -q -b main "$tmp" && touch "$tmp/README.md" && git -C "$tmp" add -A && git -C "$tmp" commit -qm init
           node cli/bin/contextkit.js init --source "$PWD" --ref "${GITHUB_REF_NAME:-main}" --root "$tmp"
           node cli/bin/contextkit.js doctor --root "$tmp"
+          node scripts/validate.js . --strict
           test -f "$tmp/.claude/skills/ai-config-discovery/SKILL.md"

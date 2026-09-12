@@ -13,8 +13,6 @@ npm-debug.log*
 # Working notes for the current task; never part of the toolkit
 prompt.md
 
-# A real user profile never belongs in the central module (see rules/README.md).
-/rules/USER.md
 
 # OS
 .DS_Store
