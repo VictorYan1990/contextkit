@@ -50,12 +50,43 @@ function normalizeSource(src) {
   return src;
 }
 
+/**
+ * Push URL installed on every managed clone. Any push fails immediately with
+ * "'NO_PUSH…' does not appear to be a git repository", regardless of the
+ * developer's permissions on the real remote. Contributions go through a real
+ * checkout of the kit, not the consumer's `.contextkit/`.
+ */
+const NO_PUSH_URL = 'NO_PUSH-contextkit-managed-clone-contribute-upstream-instead';
+
+/**
+ * Make a managed clone read-only in practice: disable pushing, detach HEAD,
+ * and drop any local branch so there is nothing to commit onto. Idempotent.
+ */
+function harden(dir) {
+  git(['remote', 'set-url', '--push', 'origin', NO_PUSH_URL], { cwd: dir });
+  const branch = tryGit(['symbolic-ref', '--quiet', '--short', 'HEAD'], { cwd: dir });
+  if (branch) git(['checkout', '--quiet', '--detach'], { cwd: dir });
+  const locals = tryGit(['for-each-ref', '--format=%(refname:short)', 'refs/heads/'], { cwd: dir }) || '';
+  for (const b of locals.split('\n').filter(Boolean)) git(['branch', '--quiet', '-D', b], { cwd: dir });
+}
+
+/** True when the clone's push URL is the disabled one. */
+function pushDisabled(dir) {
+  return tryGit(['config', '--get', 'remote.origin.pushurl'], { cwd: dir }) === NO_PUSH_URL;
+}
+
+/** Name of the checked-out branch, or null when HEAD is detached. */
+function currentBranch(dir) {
+  return tryGit(['symbolic-ref', '--quiet', '--short', 'HEAD'], { cwd: dir });
+}
+
 function clone(source, dest, ref) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   const args = ['clone', '--quiet', '--depth', '1'];
   if (ref) args.push('--branch', ref);
   args.push(normalizeSource(source), dest);
   git(args);
+  harden(dest);
   return head(dest);
 }
 
@@ -119,6 +150,7 @@ function tracksChildren(root, rel) {
 }
 
 module.exports = {
-  GitError, git, tryGit, toplevel, isRepo, head, normalizeSource, clone, updateTo,
+  GitError, NO_PUSH_URL, git, tryGit, toplevel, isRepo, head, normalizeSource, clone, updateTo,
   checkoutCommit, remoteHead, isIgnored, trackedEntries, trackedMode, tracksChildren,
+  harden, pushDisabled, currentBranch,
 };

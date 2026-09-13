@@ -46,6 +46,9 @@ function run(root) {
     const head = git.head(m.dir);
     if (m.spec.commit && head !== m.spec.commit) warn(`${rel} is at ${head.slice(0, 7)}, manifest pins ${m.spec.commit.slice(0, 7)}`);
     else ok(`${rel} @ ${head.slice(0, 7)}`);
+    if (!git.pushDisabled(m.dir)) warn(`${rel}: push is not disabled on the managed clone; run \`contextkit install\` to harden it`);
+    const branch = git.currentBranch(m.dir);
+    if (branch) warn(`${rel}: HEAD is on branch "${branch}" (managed clones should be detached); run \`contextkit install\``);
     present.push(m);
   }
 

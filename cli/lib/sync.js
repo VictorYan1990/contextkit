@@ -22,7 +22,11 @@ function ensureClone(dir, { source, ref, commit }, { update = false } = {}) {
     git.clone(source, dir, ref);
   } else if (update) {
     log.step(`update ${dir} to tip of ${ref}`);
-    return git.updateTo(dir, ref);
+    const tip = git.updateTo(dir, ref);
+    git.harden(dir);
+    return tip;
+  } else {
+    git.harden(dir); // clones made by older versions get the same guards
   }
   let head = git.head(dir);
   if (commit && head !== commit) {

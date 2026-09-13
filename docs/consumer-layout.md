@@ -60,6 +60,22 @@ Add one step before anything that relies on the kit:
 Private modules need credentials the runner can use for `git clone` (an SSH key
 or a token in the URL via `--source`/manifest override).
 
+## The managed clone is read-only in practice
+
+`.contextkit/` is a shallow git clone, and git cannot make a clone read-only.
+The CLI does the next best thing on every `init`, `install`, and `update`: it
+sets the push URL to a dead string, detaches HEAD, and deletes the local
+branch. A `git push` from inside it fails with
+
+```
+fatal: 'NO_PUSH-contextkit-managed-clone-contribute-upstream-instead' does not appear to be a git repository
+```
+
+Local edits there are discarded by the next `update` and never enter the
+consumer repo, which ignores the directory. Who can change the kit is decided by
+the kit repository's own permissions; to contribute, clone the kit itself and
+open a pull request. `doctor` warns when a clone is missing these guards.
+
 ## Project-owned content
 
 Put your own skills in `.agents/skills/<name>/SKILL.md` and personas in

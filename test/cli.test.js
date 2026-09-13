@@ -34,6 +34,16 @@ test('init wires central, writes manifest, AGENTS.md, CLAUDE.md, .gitignore; doc
   assert.ok(fs.existsSync(path.join(consumer, 'CLAUDE.md')));
   assert.match(fs.readFileSync(path.join(consumer, '.gitignore'), 'utf8'), /^\.contextkit\/$/m);
   assert.match(r.out, /doctor: all checks passed/);
+  // The managed clone is read-only in practice: no push URL, detached HEAD, no local branch.
+  const kit = path.join(consumer, '.contextkit');
+  assert.equal(git(['config', '--get', 'remote.origin.pushurl'], kit), 'NO_PUSH-contextkit-managed-clone-contribute-upstream-instead');
+  assert.equal(git(['for-each-ref', 'refs/heads/'], kit), '', 'no local branches');
+  assert.throws(() => git(['symbolic-ref', '--quiet', 'HEAD'], kit), 'HEAD is detached');
+  fs.writeFileSync(path.join(kit, 'stray.md'), 'x');
+  git(['add', 'stray.md'], kit);
+  git(['commit', '-q', '-m', 'stray'], kit);
+  assert.throws(() => git(['push', 'origin', 'HEAD:main'], kit), /does not appear to be a git repository/);
+  assert.equal(git(['rev-parse', 'HEAD'], central) !== git(['rev-parse', 'HEAD'], kit), true, 'source untouched');
   // Re-running is idempotent.
   const again = ck(['init', '--source', central], consumer);
   assert.equal(again.code, 0, again.out);
