@@ -18,6 +18,31 @@ After that the repo has a gitignored `.contextkit/` clone, a committed
 kit's skills and personas visible to Claude Code and Cursor at session start.
 Collaborators run `npx github:VictorYan1990/contextkit install` after cloning.
 
+## Workflow in a consumer repository
+
+1. **Install, then commit.** `npx github:VictorYan1990/contextkit init` clones
+   the kit into `.contextkit/`, wires it into `.agents/`, `.claude/`, `.cursor/`,
+   and writes the managed block in `AGENTS.md`. Commit `contextkit.json`,
+   `AGENTS.md`, `CLAUDE.md`, and the new links.
+2. **Start the agent session after the install.** Tools scan skills at
+   startup, so a session opened before `init` will not see the kit; restart it.
+   The session's first reply reports `Layer 1 skill discovery: OK (N project
+   skills)` on its own.
+3. **Optionally audit.** Type `/verify-ai-layout` in the session, or run
+   `npx github:VictorYan1990/contextkit doctor` outside it.
+4. **Ignore `.contextkit/` and work.** Project-specific AI content goes in
+   `.agents/` as new files next to the kit's symlinks: skills in
+   `.agents/skills/<name>/SKILL.md`, personas in `.agents/personas/`, local
+   knowledge in `.agents/knowledge/`. Never edit *through* a symlink; that
+   changes the managed clone and the next `update` discards it.
+5. **Keep current.** `npx github:VictorYan1990/contextkit update` moves to the
+   latest kit commit; commit the changed `contextkit.json`. After a fresh clone
+   or in CI, `install` restores `.contextkit/` from the pin.
+6. **Optionally contribute back.** Content that would help other repos goes
+   upstream: clone the kit repository itself (not `.contextkit/`, which cannot
+   push), add the item, run `validate`, and open a pull request. Domain-specific
+   material belongs in a sub-module rather than central.
+
 ## What is in the kit
 
 | Content type | Where | What it is |

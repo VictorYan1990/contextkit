@@ -3,6 +3,24 @@
 What a repository looks like after `npx github:VictorYan1990/contextkit init`,
 and how to live with it.
 
+## The workflow, end to end
+
+| Step | Who | What happens |
+| --- | --- | --- |
+| 1. `npx github:VictorYan1990/contextkit init` | developer, once | `.contextkit/` cloned (gitignored); `.agents/skills|personas` gain one symlink per kit item; four tool links created if missing; managed block written into `AGENTS.md`; `CLAUDE.md` created if missing; `contextkit.json` written; `doctor` runs. Commit the result. |
+| 2. Start (or restart) the agent session | developer | Skills are scanned at startup, so the session must begin after step 1. The first reply reports the Layer 1 self-check from `AGENTS.md`. |
+| 3. `/verify-ai-layout` or `contextkit doctor` | optional | Audit discovery, links, manifest, clone guards; repair broken relative links. |
+| 4. Develop | developer, daily | Ignore `.contextkit/`. Add project-specific content as new files in `.agents/`; the kit's symlinks sit beside them. Do not edit through a symlink. |
+| 5. `contextkit update` | developer, when wanted | Move the pin to the kit's latest commit, re-wire, re-render the block; commit `contextkit.json`. Fresh clones and CI run `install` instead. |
+| 6. Contribute upstream | optional | Clone the kit repository, add the item, `validate`, open a PR. `.contextkit/` itself cannot push. |
+
+Two rules make step 4 safe. First, the CLI only ever writes its own files and
+links, so nothing you add to `.agents/` is touched by `update`; a name collision
+with a kit item is refused rather than overwritten. Second, the managed clone is
+disposable: anything changed inside `.contextkit/`, including edits made through
+a symlink in `.agents/`, is lost on the next `update`, so project content must
+be a real file in `.agents/`, not an edit to a linked one.
+
 ## Files
 
 ```
