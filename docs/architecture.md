@@ -33,7 +33,7 @@ does not fit, it is usually two pieces.
 
 contextkit therefore has two jobs: get content into the Layer 1 locations
 (links), and get the always-on parts read at Layer 2 (the managed block in
-`AGENTS.md`). The `ai-config-discovery` skill documents the evidence.
+`AGENTS.md`). The `ai-layout` skill states the facts; `knowledge/ai-tooling/` holds the evidence.
 
 ## Modules
 
@@ -83,7 +83,7 @@ line if absent; the links (or copies) it created under `.agents/`, `.claude/`,
 
 One deliberate exception: two hand-written `AGENTS.md` sections that the
 managed block supersedes, `## Agent config layout` and
-`## Session start: Layer 1 skill check` (the headings the `ai-layout-scaffold`
+`## Session start: Layer 1 skill check` (the headings the former `ai-layout-scaffold`
 skill produced before contextkit). `init` and `install` remove them and place
 the block where the first one was, so an agent never reads two layout tables or
 two self-check instructions. The removed text is only ever the scaffold's own,

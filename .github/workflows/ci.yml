@@ -43,4 +43,4 @@ jobs:
           node cli/bin/contextkit.js init --source "$PWD" --ref "${GITHUB_REF_NAME:-main}" --root "$tmp"
           node cli/bin/contextkit.js doctor --root "$tmp"
           node scripts/validate.js . --strict
-          test -f "$tmp/.claude/skills/ai-config-discovery/SKILL.md"
+          test -f "$tmp/.claude/skills/ai-layout/SKILL.md"

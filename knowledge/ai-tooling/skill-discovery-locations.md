@@ -28,9 +28,21 @@ Designing contextkit's consumer wiring: the kit is cloned into `.contextkit/`
   "A `<skill-name>` entry can be a symlink to a directory elsewhere on disk";
   "If the same target is reachable from multiple locations, Claude Code loads
   the skill once." The page does not mention gitignore filtering.
-- Earlier observation recorded in the `ai-config-discovery` skill: the scanner
-  logs `Skipped gitignored skills dir` when the **skills directory itself** is
+- Claude Code scanner, read from the CLI bundle (2026-08): `dynamicSkillDirs`
+  walks up from cwd building candidates with a hardcoded
+  `path.join(dir, ".claude", "skills")`; there is no `skillDir`, `skillsPath`,
+  or `skillRoot` setting. It calls `realpath()` on the directory (so a
+  symlinked `.claude/skills` is followed) and logs
+  `Skipped gitignored skills dir` when the **skills directory itself** is
   gitignored.
+- Behavioural confirmation (2026-08): with `.claude/skills` deleted, a fresh
+  Claude Code session listed **zero** project skills even though
+  `CLAUDE.md` → `AGENTS.md` was loaded and named `.agents/skills/` as
+  canonical. Layer 2 prose cannot redirect Layer 1 scanning.
+- Cursor confirmation (2026-08): with the `.cursor/skills` link removed, a fresh
+  Cursor session still found a skill at its real `.agents/skills/` path. Cursor's
+  links are therefore redundant and kept only for symmetry; Claude Code's are
+  required.
 - **Verified 2026-09-07, Claude Code 2.1.263:** a symlink whose *target* is
   gitignored is still loaded. In a scratch consumer with
   `.claude/skills -> ../.agents/skills` and
@@ -56,5 +68,7 @@ Cursor was not available on this machine to run the same check.
 
 ## Promote?
 
-Leave as knowledge; the `ai-config-discovery` skill already carries the
-operational guidance.
+Leave as knowledge; the `ai-layout` skill carries the operational guidance and
+cites this entry. (The skill names in the evidence above are the ones that
+existed on the dates given; `ai-config-discovery` and `ai-layout-scaffold`
+were merged into `ai-layout` on 2026-09-13.)

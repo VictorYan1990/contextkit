@@ -33,7 +33,7 @@ The links are **required**: Claude Code's skill scanner is hardcoded to
 `.claude/skills` and has no setting for extra roots, so this file's guidance
 cannot redirect it. Cursor also scans `.agents/skills/` directly. Use symlinks,
 never junctions; on Windows this needs Developer Mode plus
-`core.symlinks=true`. See the `ai-config-discovery` skill.
+`core.symlinks=true`. See the `ai-layout` skill.
 
 **Manual audit:** type `/verify-ai-layout` to check Layer 1 discovery, the
 links, and the contextkit install, then refresh stale project docs. That
@@ -56,5 +56,5 @@ command instead. Only a skill you *could* invoke, yet cannot see, indicates a
 broken link.
 
 Then continue with the user's request. Only diagnose further if asked; the
-`ai-config-discovery` skill has the procedure.
+`ai-layout` skill has the procedure.
 <!-- contextkit:end -->

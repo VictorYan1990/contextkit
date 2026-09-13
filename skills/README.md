@@ -22,5 +22,5 @@ them.
 Do not edit skills inside a consumer's `.contextkit/`; change them here (or in
 the owning sub-module) and run `contextkit update` in the consumer.
 
-Authoring rules: see the `skill-authoring` skill. Validation:
+Authoring rules: see the `skill-authoring` skill. Layout and discovery: `ai-layout`. Validation:
 `node scripts/validate.js .`

@@ -52,7 +52,7 @@ function findBlock(text) {
 
 /**
  * Hand-written sections that the managed block supersedes. These are the
- * headings the `ai-layout-scaffold` skill produced before contextkit existed.
+ * headings the former `ai-layout-scaffold` skill produced before contextkit existed.
  */
 const LEGACY_HEADINGS = [
   /^## Agent config layout\s*$/,

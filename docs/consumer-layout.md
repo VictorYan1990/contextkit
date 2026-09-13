@@ -85,7 +85,7 @@ items; `doctor` reports collisions. Knowledge you capture locally goes in
 
 ## Migrating a repo that already has the scaffold
 
-Repos set up by hand with the `ai-layout-scaffold` skill already have
+Repos set up by hand, or with an earlier version of the `ai-layout` skill, already have
 `.agents/`, the four tool links, and local copies of the layout skills. `init`
 handles the overlap:
 

@@ -41,7 +41,7 @@ if it will be read in a repo you have never seen. Domain-specific content
 The links exist so that working on this repo dogfoods Layer 1 discovery. Claude
 Code scans only `.claude/skills`; Cursor also scans `.agents/skills`, which this
 repo does not have (that directory is the *consumer-side* aggregation point).
-Use symlinks, never junctions; see the `ai-config-discovery` skill.
+Use symlinks, never junctions; see the `ai-layout` skill.
 
 ## Authoring conventions
 
@@ -98,5 +98,5 @@ those are deliberately excluded. Confirm them by their slash command instead.
 Only a skill you *could* invoke, yet cannot see, indicates a broken link.
 
 Then continue with the user's request. Only diagnose further if asked; the
-`ai-config-discovery` skill has the procedure, and `npm run doctor` runs the
+`ai-layout` skill has the procedure, and `npm run doctor` runs the
 mechanical checks.

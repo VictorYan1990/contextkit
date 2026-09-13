@@ -1,6 +1,6 @@
 {
   "name": "contextkit",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Importable context infrastructure for AI coding agents: skills, personas, rules, and knowledge, wired into any repo with one command.",
   "license": "MIT",
   "author": "Victor Yan",
