@@ -116,13 +116,52 @@ function put(items, key, item) {
   items.set(key, item);
 }
 
+/** Keys the kit should wire: every provided item minus excluded and ejected ones. */
+function activeItems(all, { excludes = [], overrides = {} } = {}) {
+  return new Map([...all].filter(([k]) => !excludes.includes(k) && !Object.hasOwn(overrides, k)));
+}
+
+/**
+ * Resolve a user-typed item spec to a key in `items`: accepts "skill-authoring",
+ * "skills/skill-authoring", "code-reviewer", "code-reviewer.md", "personas/code-reviewer.md".
+ */
+function resolveItemKey(items, spec) {
+  const s = spec.replace(/^\.agents\//, '').replace(/\/$/, '');
+  const candidates = [s, `skills/${s}`, `personas/${s}`, `personas/${s}.md`, `${s}.md`];
+  const hits = [...new Set(candidates.filter((c) => items.has(c)))];
+  if (hits.length === 1) return hits[0];
+  if (hits.length > 1) throw new Error(`"${spec}" is ambiguous: ${hits.join(', ')}. Use the full key.`);
+  throw new Error(`No kit item matches "${spec}". Known: ${[...items.keys()].join(', ') || '(none)'}`);
+}
+
+/**
+ * Replace the kit link (or tracked copy) at `key` with a project-owned copy of
+ * the upstream item. Returns the upstream content hash for drift detection.
+ */
+function ejectItem(root, item, key, copies = {}) {
+  const dest = path.join(agentsDir(root), key);
+  const upstream = hashPath(item.targetAbs);
+  if (isKitLink(dest)) {
+    fs.unlinkSync(dest);
+  } else if (Object.hasOwn(copies, key)) {
+    delete copies[key]; // already a real copy; it just stops being tracked
+    return upstream;
+  } else if (exists(dest)) {
+    throw new CollisionError(`${key} already exists in .agents/ and is not a kit item.`);
+  }
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.cpSync(item.targetAbs, dest, { recursive: true });
+  return upstream;
+}
+
 /**
  * Wire every module item into `.agents/`. `modules` is [{name, dir}] with central first.
  * mode: 'link' | 'copy'. `copies` is the manifest's recorded hashes (mutated in copy mode).
- * Returns { created, kept, removed, collisions }.
+ * `excludes` (keys) are never wired; `overrides` (keys) are project-owned and left alone.
+ * Returns { created, kept, removed, updated }.
  */
-function wireItems(root, modules, { mode = 'link', copies = {}, force = false } = {}) {
-  const desired = desiredItems(modules);
+function wireItems(root, modules, { mode = 'link', copies = {}, force = false, excludes = [], overrides = {} } = {}) {
+  const desired = activeItems(desiredItems(modules), { excludes, overrides });
   const base = agentsDir(root);
   const result = { created: [], kept: [], removed: [], updated: [] };
 
@@ -210,5 +249,6 @@ function unwireAll(root, copies = {}) {
 }
 
 module.exports = {
-  TOOL_LINKS, CollisionError, ensureSymlink, wireToolLinks, wireItems, unwireAll, desiredItems, isKitLink, isSymlink, hashPath,
+  TOOL_LINKS, CollisionError, ensureSymlink, wireToolLinks, wireItems, unwireAll, desiredItems, activeItems,
+  resolveItemKey, ejectItem, isKitLink, isSymlink, hashPath,
 };

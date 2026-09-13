@@ -65,7 +65,10 @@ function sync(root, manifest, opts = {}) {
 
   const tool = links.wireToolLinks(root);
   manifest.copies = manifest.copies || {};
-  const items = links.wireItems(root, mods, { mode: manifest.mode, copies: manifest.copies, force: opts.force });
+  const items = links.wireItems(root, mods, {
+    mode: manifest.mode, copies: manifest.copies, force: opts.force,
+    excludes: manifest.excludes || [], overrides: manifest.overrides || {},
+  });
   if (manifest.mode === 'link') manifest.copies = {};
 
   const info = mods.map((m) => {
@@ -103,4 +106,26 @@ function report(result) {
   if (result.ignore === 'added') log.ok(`.gitignore: added ${paths.KIT_DIR}/`);
 }
 
-module.exports = { ensureClone, moduleList, sync, report, path };
+/** Every provided item across installed modules (collisions throw). */
+function allItems(root, manifest) {
+  return links.desiredItems(moduleList(root, manifest).filter((m) => fs.existsSync(m.dir)));
+}
+
+/** Ejected items whose upstream version changed since the eject, or vanished. */
+function overrideDrift(root, manifest) {
+  let all;
+  try {
+    all = allItems(root, manifest);
+  } catch {
+    return [];
+  }
+  const out = [];
+  for (const [key, rec] of Object.entries(manifest.overrides || {})) {
+    const item = all.get(key);
+    if (!item) out.push({ key, state: 'gone' });
+    else if (rec.hash && links.hashPath(item.targetAbs) !== rec.hash) out.push({ key, state: 'changed', module: item.module });
+  }
+  return out;
+}
+
+module.exports = { ensureClone, moduleList, sync, report, allItems, overrideDrift, path };

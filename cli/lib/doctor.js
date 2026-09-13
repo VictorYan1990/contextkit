@@ -78,14 +78,32 @@ function run(root) {
   }
 
   // Items
-  let desired;
+  let all;
   try {
-    desired = links.desiredItems(present);
+    all = links.desiredItems(present);
   } catch (err) {
     fail(err.message);
     return finish(checks);
   }
+  const excludes = manifest.excludes || [];
+  const overrides = manifest.overrides || {};
+  const desired = links.activeItems(all, { excludes, overrides });
   const base = paths.agentsDir(root);
+
+  // Ejected items are project-owned real files; report upstream drift.
+  for (const [key, rec] of Object.entries(overrides)) {
+    const dest = path.join(base, key);
+    const st = fs.lstatSync(dest, { throwIfNoEntry: false });
+    if (!st) fail(`${key} is ejected but missing from .agents/; run \`contextkit restore ${key} --force\` to re-link it`);
+    else if (st.isSymbolicLink()) fail(`${key} is recorded as ejected but is a symlink; run \`contextkit eject ${key}\` again`);
+    else if (!all.has(key)) warn(`${key} is ejected but no installed module provides it any more`);
+    else if (rec.hash && links.hashPath(all.get(key).targetAbs) !== rec.hash) warn(`${key} is ejected and upstream has changed since (module ${all.get(key).module}); review and merge by hand`);
+    else ok(`${key} ejected (project-owned, upstream unchanged)`);
+  }
+  for (const key of excludes) {
+    if (!all.has(key)) warn(`${key} is excluded but no installed module provides it`);
+  }
+  if (excludes.length) ok(`${excludes.length} excluded: ${excludes.join(', ')}`);
   let wired = 0;
   for (const [key, item] of desired) {
     const dest = path.join(base, key);

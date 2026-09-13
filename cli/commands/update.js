@@ -3,7 +3,7 @@
 const log = require('../lib/log');
 const paths = require('../lib/paths');
 const manifestLib = require('../lib/manifest');
-const { sync, report, moduleList } = require('../lib/sync');
+const { sync, report, moduleList, overrideDrift } = require('../lib/sync');
 const links = require('../lib/links');
 
 module.exports = {
@@ -34,6 +34,10 @@ module.exports = {
     const gone = [...before].filter((k) => !after.has(k));
     if (added.length) log.info(`  new items: ${added.join(', ')}`);
     if (gone.length) log.info(`  removed items: ${gone.join(', ')}`);
+    for (const d of overrideDrift(root, manifest)) {
+      if (d.state === 'gone') log.warn(`${d.key} is ejected but upstream no longer provides it`);
+      else log.warn(`${d.key} is ejected and upstream changed it (module ${d.module}); review and merge by hand`);
+    }
     return 0;
   },
 };
@@ -46,7 +50,8 @@ function snapshot(manifest) {
 
 function safeItems(root, manifest) {
   try {
-    return new Set(links.desiredItems(moduleList(root, manifest).filter((m) => require('node:fs').existsSync(m.dir))).keys());
+    const all = links.desiredItems(moduleList(root, manifest).filter((m) => require('node:fs').existsSync(m.dir)));
+    return new Set(links.activeItems(all, manifest).keys());
   } catch {
     return new Set();
   }

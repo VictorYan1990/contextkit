@@ -209,3 +209,68 @@ test('migration: old tracked skill copies and legacy AGENTS.md sections are hand
   assert.doesNotMatch(d.out, /not committed|still tracks|legacy/);
   assert.match(d.out, /does not exist: \.agents\/personas\/gone\.md/, 'dead link is project content; still reported');
 });
+
+test('eject, exclude, restore: per-item customisation survives update', () => {
+  const { central, consumer } = setup();
+  assert.equal(ck(['init', '--source', central, '--no-doctor'], consumer).code, 0);
+  const manifestOf = () => JSON.parse(fs.readFileSync(path.join(consumer, 'contextkit.json'), 'utf8'));
+  const alpha = path.join(consumer, '.agents/skills/alpha');
+  const beta = path.join(consumer, '.agents/skills/beta');
+  const reviewer = path.join(consumer, '.agents/personas/reviewer.md');
+
+  let r = ck(['eject', 'alpha'], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(isLink(alpha), false);
+  assert.ok(fs.existsSync(path.join(alpha, 'SKILL.md')));
+  let m = manifestOf();
+  assert.equal(m.overrides['skills/alpha'].module, 'central');
+  assert.ok(m.overrides['skills/alpha'].hash);
+  fs.appendFileSync(path.join(alpha, 'SKILL.md'), '\nlocal customisation\n');
+  assert.match(ck(['eject', 'alpha'], consumer).out, /already ejected/);
+
+  r = ck(['exclude', 'beta'], consumer);
+  assert.equal(r.code, 0, r.out);
+  r = ck(['exclude', 'reviewer'], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.ok(!fs.existsSync(beta) && !isLink(beta));
+  assert.ok(!fs.existsSync(reviewer) && !isLink(reviewer));
+  assert.deepEqual(manifestOf().excludes, ['personas/reviewer.md', 'skills/beta']);
+  assert.match(ck(['exclude', 'alpha'], consumer).out, /is ejected/);
+  assert.match(ck(['eject', 'nope'], consumer).out, /No kit item matches/);
+
+  // Upstream changes alpha and beta; update must keep the local copy, warn, and not resurrect beta.
+  write(path.join(central, 'skills/alpha/SKILL.md'), skill('alpha', 'paths: ["x/**"]\n'));
+  write(path.join(central, 'skills/beta/SKILL.md'), skill('beta', 'paths: ["y/**"]\n'));
+  commitAll(central, 'change alpha and beta');
+  r = ck(['update'], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.match(fs.readFileSync(path.join(alpha, 'SKILL.md'), 'utf8'), /local customisation/);
+  assert.match(r.out, /skills\/alpha is ejected and upstream changed it/);
+  assert.ok(!fs.existsSync(beta) && !isLink(beta), 'excluded item stays excluded');
+  const d = ck(['doctor'], consumer);
+  assert.equal(d.code, 0, d.out);
+  assert.match(d.out, /skills\/alpha is ejected and upstream has changed/);
+  assert.match(d.out, /2 excluded: personas\/reviewer\.md, skills\/beta/);
+  // A fresh install from the manifest reproduces the same set.
+  fs.rmSync(path.join(consumer, '.contextkit'), { recursive: true });
+  r = ck(['install', '--no-doctor'], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(isLink(alpha), false);
+  assert.ok(!fs.existsSync(beta));
+
+  r = ck(['restore', 'alpha'], consumer);
+  assert.equal(r.code, 1);
+  assert.match(r.out, /--force/);
+  assert.ok(fs.existsSync(path.join(alpha, 'SKILL.md')), 'refused restore keeps the copy');
+  r = ck(['restore', 'alpha', '--force'], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(isLink(alpha), true);
+  assert.match(fs.readFileSync(path.join(alpha, 'SKILL.md'), 'utf8'), /paths:/, 'kit version is back');
+  r = ck(['restore', 'beta'], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.equal(isLink(beta), true);
+  m = manifestOf();
+  assert.equal(m.overrides, undefined);
+  assert.deepEqual(m.excludes, ['personas/reviewer.md']);
+  assert.match(ck(['restore', 'alpha'], consumer).out, /neither ejected nor excluded/);
+});

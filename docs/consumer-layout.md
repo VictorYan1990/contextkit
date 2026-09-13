@@ -101,6 +101,33 @@ Put your own skills in `.agents/skills/<name>/SKILL.md` and personas in
 items; `doctor` reports collisions. Knowledge you capture locally goes in
 `.agents/knowledge/`; upstream it to a module when it stops being project-specific.
 
+## Customising per item: eject, exclude, restore
+
+Links keep every repo on one source of truth; these three commands let a repo
+diverge one item at a time without giving that up.
+
+- **`eject <item>`** replaces the symlink with a real copy of the upstream file
+  or folder in `.agents/`, and records `{ module, commit, hash }` under
+  `overrides` in `contextkit.json`. From then on the item is project-owned:
+  `update` and `install` skip it, collisions do not apply, and you edit it like
+  any project file. `doctor` and `update` compare the recorded hash with the
+  current upstream item and warn when upstream has changed, so you can merge the
+  change by hand if you want it.
+- **`exclude <item>`** removes the link and records the key under `excludes`.
+  `update` will not recreate it. Use it for kit items that do not apply to this
+  repo.
+- **`restore <item>`** reverses either. Restoring an eject deletes your copy, so
+  it requires `--force`; git history keeps the edits.
+
+Item specs accept the short name (`skill-authoring`, `code-reviewer`) or the
+full key (`skills/skill-authoring`, `personas/code-reviewer.md`). The manifest
+is the record, so commit it: teammates and CI reproduce the same set from
+`install`.
+
+Prefer the cheaper option when it fits: repo-specific guidance usually belongs
+in `AGENTS.md` next to the managed block, where the agent reads it together with
+the unchanged kit skill.
+
 ## Migrating a repo that already has the scaffold
 
 Repos set up by hand, or with an earlier version of the `ai-layout` skill, already have

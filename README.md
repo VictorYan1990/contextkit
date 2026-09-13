@@ -66,6 +66,9 @@ optional and independently versioned.
 | `install` | Restore from an existing `contextkit.json` (fresh clone, CI) |
 | `add <name\|url>` / `remove <name>` | Add or remove a sub-module |
 | `update [name\|--all]` | Move to the pinned ref's latest commit and re-wire |
+| `eject <item>` | Make one kit skill or persona a project-owned copy you can edit |
+| `exclude <item>` | Drop one kit item from this repo |
+| `restore <item> [--force]` | Undo an eject or exclude |
 | `list [--available]` | Installed modules, or the registry |
 | `doctor` | Check links, manifest, and collisions; exit 1 on failure |
 | `new-module <name>` | Scaffold a new sub-module repository |
@@ -73,6 +76,24 @@ optional and independently versioned.
 
 Options common to `init`: `--source <git-url>`, `--ref <branch|tag>`,
 `--mode link|copy`, `--with <module>…`.
+
+## Customising kit items in a consumer repo
+
+Kit items arrive as symlinks so every repo stays on one source of truth, but you
+decide per item when to diverge:
+
+| You want to… | Do this | Effect |
+| --- | --- | --- |
+| Add guidance specific to this repo | Write it in `AGENTS.md` or as a new file under `.agents/` | Read alongside the kit's content; nothing to maintain |
+| Edit a kit skill or persona for this repo | `npx github:VictorYan1990/contextkit eject code-reviewer` | The link becomes a real, editable file in `.agents/`; `update` leaves it alone; `doctor` tells you when upstream changed it |
+| Drop a kit item you do not want here | `npx github:VictorYan1990/contextkit exclude capture-knowledge` | Link removed; `update` does not bring it back |
+| Go back to the kit version | `npx github:VictorYan1990/contextkit restore <item> [--force]` | Re-links it; `--force` is required to delete an ejected copy |
+
+Items are named by skill or persona name (`code-reviewer`) or by key
+(`skills/code-reviewer`, `personas/planner.md`). Both decisions are recorded in
+`contextkit.json` under `overrides` and `excludes`, so teammates and CI get the
+same result from `install`. Never edit a kit file *through* its symlink: that
+changes the managed clone and the next `update` discards it. Eject first.
 
 ## Documentation
 
