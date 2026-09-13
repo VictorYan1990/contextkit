@@ -80,3 +80,11 @@ Touch files it does not own. Its write set in a consumer is exactly:
 `<!-- contextkit:end -->` in `AGENTS.md`; `CLAUDE.md` if absent; a `.gitignore`
 line if absent; the links (or copies) it created under `.agents/`, `.claude/`,
 `.cursor/`; and `.contextkit/` itself.
+
+One deliberate exception: two hand-written `AGENTS.md` sections that the
+managed block supersedes, `## Agent config layout` and
+`## Session start: Layer 1 skill check` (the headings the `ai-layout-scaffold`
+skill produced before contextkit). `init` and `install` remove them and place
+the block where the first one was, so an agent never reads two layout tables or
+two self-check instructions. The removed text is only ever the scaffold's own,
+and git history keeps it.

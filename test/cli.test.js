@@ -173,3 +173,29 @@ test('list shows installed modules and the registry', () => {
   r = ck(['list', '--available'], consumer);
   assert.match(r.out, /extra module/);
 });
+
+test('migration: old tracked skill copies and legacy AGENTS.md sections are handled', () => {
+  const { central, consumer } = setup();
+  // The consumer already has hand-written scaffold sections and a committed local copy of a kit skill.
+  write(path.join(consumer, 'AGENTS.md'), '# AGENTS.md\n\n## Project overview\n\nMine.\n\n## Agent config layout\n\nOld table.\n\n## Personas\n\n- [`gone.md`](.agents/personas/gone.md)\n\n## Session start: Layer 1 skill check\n\nOld check.\n');
+  write(path.join(consumer, '.agents/skills/alpha/SKILL.md'), skill('alpha'));
+  commitAll(consumer, 'scaffold');
+  // Developer deletes the local copy from the working tree (not yet committed), then installs the kit.
+  fs.rmSync(path.join(consumer, '.agents/skills/alpha'), { recursive: true });
+  const r = ck(['init', '--source', central], consumer);
+  assert.equal(r.code, 0, r.out);
+  assert.match(r.out, /replaced legacy section\(s\).*Agent config layout.*Session start/);
+  assert.match(r.out, /\.agents\/skills\/alpha: git still tracks old files at this path/);
+  assert.match(r.out, /\.agents\/skills\/beta link is not committed yet/);
+  assert.match(r.out, /links to a path that does not exist: \.agents\/personas\/gone\.md/);
+  const text = fs.readFileSync(path.join(consumer, 'AGENTS.md'), 'utf8');
+  assert.equal((text.match(/^## Agent config layout/gm) || []).length, 1);
+  assert.match(text, /## Project overview\n\nMine\.\n\n<!-- contextkit:begin/);
+  assert.match(text, /## Personas/);
+  // After committing, the tracking warnings disappear and doctor is clean of them.
+  commitAll(consumer, 'adopt contextkit');
+  const d = ck(['doctor'], consumer);
+  assert.equal(d.code, 0, d.out);
+  assert.doesNotMatch(d.out, /not committed|still tracks|legacy/);
+  assert.match(d.out, /does not exist: \.agents\/personas\/gone\.md/, 'dead link is project content; still reported');
+});

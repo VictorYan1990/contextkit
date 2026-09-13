@@ -92,13 +92,33 @@ function isIgnored(root, rel) {
   return tryGit(['check-ignore', '-q', '--', rel], { cwd: root }) !== null;
 }
 
-/** Index mode of a tracked path (e.g. '120000' for a symlink), or null if untracked. */
-function trackedMode(root, rel) {
+/**
+ * Index entries at or under `rel`: [{ mode, path }]. A symlink or file is one
+ * entry at exactly `rel`; a tracked directory shows up as its children.
+ */
+function trackedEntries(root, rel) {
   const out = tryGit(['ls-files', '-s', '--', rel], { cwd: root });
-  return out ? out.split(/\s+/)[0] : null;
+  if (!out) return [];
+  return out.split('\n').filter(Boolean).map((line) => {
+    const [meta, p] = line.split('\t');
+    return { mode: meta.split(/\s+/)[0], path: p };
+  });
+}
+
+/** Index mode of exactly `rel` (e.g. '120000' for a symlink), or null if that path is not tracked. */
+function trackedMode(root, rel) {
+  const want = rel.split(path.sep).join('/');
+  const hit = trackedEntries(root, rel).find((e) => e.path === want);
+  return hit ? hit.mode : null;
+}
+
+/** True when git tracks files *under* `rel` (a former directory) rather than `rel` itself. */
+function tracksChildren(root, rel) {
+  const want = rel.split(path.sep).join('/');
+  return trackedEntries(root, rel).some((e) => e.path !== want && e.path.startsWith(`${want}/`));
 }
 
 module.exports = {
   GitError, git, tryGit, toplevel, isRepo, head, normalizeSource, clone, updateTo,
-  checkoutCommit, remoteHead, isIgnored, trackedMode,
+  checkoutCommit, remoteHead, isIgnored, trackedEntries, trackedMode, tracksChildren,
 };

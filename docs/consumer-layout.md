@@ -67,6 +67,24 @@ Put your own skills in `.agents/skills/<name>/SKILL.md` and personas in
 items; `doctor` reports collisions. Knowledge you capture locally goes in
 `.agents/knowledge/`; upstream it to a module when it stops being project-specific.
 
+## Migrating a repo that already has the scaffold
+
+Repos set up by hand with the `ai-layout-scaffold` skill already have
+`.agents/`, the four tool links, and local copies of the layout skills. `init`
+handles the overlap:
+
+- **Local copies of kit items** collide with the kit's links. Delete the copies
+  from `.agents/skills/` and `.agents/personas/` first, then run `init`. Until
+  you commit, doctor reports "git still tracks old files at this path"; the
+  commit turns the tracked files into tracked symlinks.
+- **`## Agent config layout` and `## Session start: Layer 1 skill check`** in
+  `AGENTS.md` are replaced by the managed block, in place. Everything else in
+  the file stays.
+- **Links to deleted personas** in your own sections are reported by doctor as
+  dead links; fix them by hand, since that text is yours.
+
+Then commit `contextkit.json`, `AGENTS.md`, and the new links.
+
 ## Uninstall
 
 ```bash

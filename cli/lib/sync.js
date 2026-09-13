@@ -89,7 +89,12 @@ function report(result) {
   if (items.updated.length) log.ok(`updated ${items.updated.length} copy(ies): ${items.updated.join(', ')}`);
   if (items.removed.length) log.ok(`removed ${items.removed.length} stale item(s): ${items.removed.join(', ')}`);
   if (items.kept.length && !items.created.length) log.dim(`${items.kept.length} item(s) already wired`);
-  if (result.block !== 'unchanged') log.ok(`AGENTS.md managed block ${result.block}`);
+  if (result.block.status === 'merged') {
+    log.ok(`AGENTS.md: replaced legacy section(s) with the managed block: ${result.block.removed.join(', ')}`);
+    log.dim('  (the removed text is in git history; the managed block covers the same ground)');
+  } else if (result.block.status !== 'unchanged') {
+    log.ok(`AGENTS.md managed block ${result.block.status}`);
+  }
   if (result.claude === 'created') log.ok('CLAUDE.md created');
   if (result.ignore === 'added') log.ok(`.gitignore: added ${paths.KIT_DIR}/`);
 }

@@ -72,7 +72,10 @@ Use symlinks, never junctions; see the `ai-config-discovery` skill.
 - Tests use `node --test` with temp directories and local bare repos; no network.
 - The CLI never edits a consumer's files outside: `contextkit.json`, the managed
   block in `AGENTS.md`, `CLAUDE.md` (create only), `.gitignore` (append only),
-  and the links it owns under `.agents/`, `.claude/`, `.cursor/`.
+  and the links it owns under `.agents/`, `.claude/`, `.cursor/`. The one
+  exception is the two legacy scaffold sections in `AGENTS.md` that the block
+  supersedes (`## Agent config layout`, `## Session start: Layer 1 skill
+  check`); those are removed on merge. See `docs/architecture.md`.
 
 ## Personas
 

@@ -99,7 +99,17 @@ function run(root) {
     const got = toPosix(fs.readlinkSync(dest));
     if (got !== want) { fail(`${key} -> ${got}, expected ${want}`); continue; }
     if (!fs.existsSync(dest)) { fail(`${key} -> ${got} dangles (missing clone?)`); continue; }
-    if (inGit && git.trackedMode(root, `.agents/${key}`) === null) warn(`.agents/${key} link is not committed yet`);
+    if (inGit) {
+      const rel = `.agents/${key}`;
+      const mode = git.trackedMode(root, rel);
+      if (mode === '120000') { /* committed as a symlink */ } else if (mode !== null) {
+        warn(`${rel} is tracked as mode ${mode}; commit to replace it with the link`);
+      } else if (git.tracksChildren(root, rel)) {
+        warn(`${rel}: git still tracks old files at this path; commit to replace them with the link`);
+      } else {
+        warn(`${rel} link is not committed yet`);
+      }
+    }
     wired += 1;
   }
   if (wired) ok(`${wired}/${desired.size} kit item(s) wired`);
@@ -114,8 +124,19 @@ function run(root) {
   }
 
   // AGENTS.md / CLAUDE.md
-  if (agentsmd.hasBlock(root)) ok('AGENTS.md has the managed contextkit block');
-  else fail('AGENTS.md is missing the managed contextkit block. Run `contextkit install`.');
+  const agentsFile = path.join(root, 'AGENTS.md');
+  if (agentsmd.hasBlock(root)) {
+    ok('AGENTS.md has the managed contextkit block');
+    const text = fs.readFileSync(agentsFile, 'utf8');
+    for (const s of agentsmd.findLegacySections(text)) {
+      warn(`AGENTS.md: legacy "${s.heading}" section duplicates the managed block; run \`contextkit install\` to merge`);
+    }
+    for (const target of agentsmd.deadLinks(root, text)) {
+      warn(`AGENTS.md links to a path that does not exist: ${target}`);
+    }
+  } else {
+    fail('AGENTS.md is missing the managed contextkit block. Run `contextkit install`.');
+  }
   if (fs.existsSync(path.join(root, 'CLAUDE.md'))) ok('CLAUDE.md present');
   else warn('CLAUDE.md missing (Claude Code will not load AGENTS.md)');
 
