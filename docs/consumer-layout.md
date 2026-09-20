@@ -106,13 +106,19 @@ items; `doctor` reports collisions. Knowledge you capture locally goes in
 Links keep every repo on one source of truth; these three commands let a repo
 diverge one item at a time without giving that up.
 
-- **`eject <item>`** replaces the symlink with a real copy of the upstream file
-  or folder in `.agents/`, and records `{ module, commit, hash }` under
-  `overrides` in `contextkit.json`. From then on the item is project-owned:
-  `update` and `install` skip it, collisions do not apply, and you edit it like
-  any project file. `doctor` and `update` compare the recorded hash with the
-  current upstream item and warn when upstream has changed, so you can merge the
-  change by hand if you want it.
+- **`eject <item>`** makes an item project-owned: it replaces a kit symlink with
+  a real copy of the upstream file or folder, and records `{ module, commit,
+  hash }` under `overrides` in `contextkit.json`. If a real file is already
+  sitting at that path — most commonly because `init`/`update`/`add` refused it
+  as a collision — `eject` adopts it **as-is, untouched**, instead: it never
+  overwrites content that isn't a kit link or a recorded copy. Either way, the
+  item is now project-owned: `update` and `install` skip it, collisions do not
+  apply, and you edit it like any project file. `doctor` and `update` compare
+  the recorded hash with the current upstream item and warn when upstream has
+  changed, so you can merge the change by hand if you want it. When `init` or
+  `add` refuses a collision, its error names the exact `eject` command to run —
+  that error also still leaves `contextkit.json` written, specifically so
+  `eject` has a manifest to record the override in before you retry.
 - **`exclude <item>`** removes the link and records the key under `excludes`.
   `update` will not recreate it. Use it for kit items that do not apply to this
   repo.
@@ -134,10 +140,18 @@ Repos set up by hand, or with an earlier version of the `ai-layout` skill, alrea
 `.agents/`, the four tool links, and local copies of the layout skills. `init`
 handles the overlap:
 
-- **Local copies of kit items** collide with the kit's links. Delete the copies
-  from `.agents/skills/` and `.agents/personas/` first, then run `init`. Until
-  you commit, doctor reports "git still tracks old files at this path"; the
-  commit turns the tracked files into tracked symlinks.
+- **Local copies of kit items** collide with the kit's links. Run `init`; it
+  refuses each collision by name and tells you the `eject <item>` command that
+  adopts your copy as a project-owned override, untouched, so it survives every
+  future `update`. Only delete a copy first if you genuinely want the kit's
+  version instead — that is the one case where deleting first and re-running
+  `init` is correct. Never delete a copy just to make the collision error go
+  away without checking first; if it turns out to have been a real
+  customization, that permanently discards it. Until you commit an eject's
+  result (or a plain relink), doctor reports "git still tracks old files at
+  this path" and now also spells out the same restore-and-eject advice, in case
+  the working tree already has the link and the tracked copy was never
+  formally ejected.
 - **`## Agent config layout` and `## Session start: Layer 1 skill check`** in
   `AGENTS.md` are replaced by the managed block, in place. Everything else in
   the file stays.

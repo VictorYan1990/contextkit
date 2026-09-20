@@ -6,6 +6,20 @@ tag in `contextkit.json`'s `ref` (see [`docs/modules.md`](docs/modules.md#versio
 
 ## [Unreleased]
 
+### Fixed
+
+- A first-time collision between a project-owned file and a kit item name
+  (`init`/`add`) used to be a dead end: the manifest was never written, so
+  `eject` (which requires one) couldn't be run to resolve it, leaving "delete
+  the file and retry" as the only visible way past the error — silently
+  discarding real content if that file wasn't actually stale. Now: (1) `eject`
+  adopts a pre-existing real file in place, untouched, instead of refusing it;
+  (2) the collision error names the exact `eject` command to run; (3) `init`
+  persists `contextkit.json` even when the collision aborts it, so that command
+  actually works; (4) `doctor`'s "tracked as mode …" / "git still tracks old
+  files" warnings now say the same thing for anyone who hits this after the
+  fact, once the working tree already has the link.
+
 ## [0.4.0] - 2026-09-20
 
 First tagged release.

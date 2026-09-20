@@ -116,6 +116,26 @@ test('collision with a project-owned skill is refused', () => {
   assert.match(r.out, /skills\/alpha already exists .* project-owned/);
 });
 
+test('a collision is recoverable via eject without ever losing the project file\'s content', () => {
+  const { central, consumer } = setup();
+  const custom = `${skill('alpha')}\nMy project-specific addition.\n`;
+  write(path.join(consumer, '.agents/skills/alpha/SKILL.md'), custom);
+  const r = ck(['init', '--source', central], consumer);
+  assert.equal(r.code, 1);
+  assert.match(r.out, /contextkit eject alpha/, 'the error names the content-preserving fix');
+  // A first-time collision must not leave the user stuck with no manifest to eject against.
+  assert.ok(fs.existsSync(path.join(consumer, 'contextkit.json')), 'manifest persisted despite the collision');
+  const e = ck(['eject', 'alpha'], consumer);
+  assert.equal(e.code, 0, e.out);
+  assert.equal(fs.readFileSync(path.join(consumer, '.agents/skills/alpha/SKILL.md'), 'utf8'), custom, 'eject adopted the file in place, untouched');
+  assert.equal(isLink(path.join(consumer, '.agents/skills/alpha')), false);
+  // Re-running init now succeeds and still leaves the custom content alone.
+  const again = ck(['init', '--source', central], consumer);
+  assert.equal(again.code, 0, again.out);
+  assert.match(again.out, /doctor: all checks passed/);
+  assert.equal(fs.readFileSync(path.join(consumer, '.agents/skills/alpha/SKILL.md'), 'utf8'), custom);
+});
+
 test('copy mode installs tracked copies and refuses to clobber local edits', () => {
   const { central, consumer } = setup();
   let r = ck(['init', '--source', central, '--mode', 'copy'], consumer);

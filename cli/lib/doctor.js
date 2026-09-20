@@ -124,9 +124,13 @@ function run(root) {
       const rel = `.agents/${key}`;
       const mode = git.trackedMode(root, rel);
       if (mode === '120000') { /* committed as a symlink */ } else if (mode !== null) {
-        warn(`${rel} is tracked as mode ${mode}; commit to replace it with the link`);
+        warn(`${rel} is tracked as mode ${mode}, but the working tree already has the link in its place — `
+          + `if that replaced real content, restore it first (\`git checkout -- ${rel}\`) and run `
+          + `\`contextkit eject ${item.name}\` instead of committing; otherwise commit to finish the switch.`);
       } else if (git.tracksChildren(root, rel)) {
-        warn(`${rel}: git still tracks old files at this path; commit to replace them with the link`);
+        warn(`${rel}: git still tracks old files at this path, but the working tree already has the link in `
+          + `their place — if that replaced real content, restore it first (\`git checkout -- ${rel}\`) and run `
+          + `\`contextkit eject ${item.name}\` instead of committing; otherwise commit to replace them with the link.`);
       } else {
         warn(`${rel} link is not committed yet`);
       }

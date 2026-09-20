@@ -27,8 +27,16 @@ module.exports = {
       if (manifest.modules[r.name]) { log.dim(`module ${r.name} already listed`); continue; }
       manifest.modules[r.name] = { source: r.source, ref: r.ref, commit: null };
     }
-    const result = sync(root, manifest, { force: Boolean(flags.force) });
-    manifestLib.write(root, manifest);
+    // sync() mutates `manifest` (clone commits) before it can throw on an item
+    // collision, so persist it even on failure: a first-time collision would
+    // otherwise leave no contextkit.json to run `eject` against, making
+    // "delete the file and retry" look like the only way out of the error.
+    let result;
+    try {
+      result = sync(root, manifest, { force: Boolean(flags.force) });
+    } finally {
+      manifestLib.write(root, manifest);
+    }
     report(result);
     log.ok(`${paths.MANIFEST} written (central @ ${manifest.commit.slice(0, 7)}${Object.keys(manifest.modules).length ? `, modules: ${Object.keys(manifest.modules).join(', ')}` : ''})`);
     if (!flags['no-doctor']) {

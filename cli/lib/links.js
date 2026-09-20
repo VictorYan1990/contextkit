@@ -135,8 +135,12 @@ function resolveItemKey(items, spec) {
 }
 
 /**
- * Replace the kit link (or tracked copy) at `key` with a project-owned copy of
- * the upstream item. Returns the upstream content hash for drift detection.
+ * Make `key` project-owned: replace the kit link (or tracked copy) at that
+ * path with a copy of the upstream item, or — when a real file or directory
+ * is already sitting there uninstalled (a pre-existing project file that
+ * collides with a kit item name) — leave it untouched and adopt it in place.
+ * Either way, this never overwrites content that isn't a kit link or a
+ * recorded copy. Returns the upstream content hash for drift detection.
  */
 function ejectItem(root, item, key, copies = {}) {
   const dest = path.join(agentsDir(root), key);
@@ -147,7 +151,7 @@ function ejectItem(root, item, key, copies = {}) {
     delete copies[key]; // already a real copy; it just stops being tracked
     return upstream;
   } else if (exists(dest)) {
-    throw new CollisionError(`${key} already exists in .agents/ and is not a kit item.`);
+    return upstream; // pre-existing real file at this path — adopt as-is, untouched
   }
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.cpSync(item.targetAbs, dest, { recursive: true });
@@ -187,7 +191,9 @@ function wireItems(root, modules, { mode = 'link', copies = {}, force = false, e
       if (exists(dest) && !isKitLink(dest) && !Object.hasOwn(copies, key)) {
         throw new CollisionError(
           `${key} already exists in .agents/ and is project-owned, but module "${item.module}" provides it. `
-          + 'Rename the project item or remove the module.',
+          + `To keep it: \`contextkit eject ${item.name}\` (adopts it as a project-owned override, `
+          + 'untouched, and future updates leave it alone). Otherwise rename the project item or remove '
+          + 'the module. Never just delete it to make this error go away — that discards its content for good.',
         );
       }
       if (Object.hasOwn(copies, key)) {
@@ -214,7 +220,9 @@ function wireItems(root, modules, { mode = 'link', copies = {}, force = false, e
           result.updated.push(key);
         } else {
           throw new CollisionError(
-            `${key} already exists in .agents/ and is project-owned, but module "${item.module}" provides it.`,
+            `${key} already exists in .agents/ and is project-owned, but module "${item.module}" provides it. `
+            + `To keep it: \`contextkit eject ${item.name}\`. Never just delete it to make this error go `
+            + 'away — that discards its content for good.',
           );
         }
       } else {
