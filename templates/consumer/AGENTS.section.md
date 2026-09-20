@@ -32,8 +32,8 @@ seem missing, run `npx contextkit doctor`; after a fresh clone run
 The links are **required**: Claude Code's skill scanner is hardcoded to
 `.claude/skills` and has no setting for extra roots, so this file's guidance
 cannot redirect it. Cursor also scans `.agents/skills/` directly. Use symlinks,
-never junctions; on Windows this needs Developer Mode plus
-`core.symlinks=true`. See the `ai-layout` skill.
+never junctions; native Windows is not a supported target for this — work from
+WSL, or install with `--mode copy` instead. See the `ai-layout` skill.
 
 **Manual audit:** type `/verify-ai-layout` to check Layer 1 discovery, the
 links, and the contextkit install, then refresh stale project docs. That
