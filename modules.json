@@ -1,10 +1,11 @@
 {
-  "$comment": "Registry of known contextkit sub-modules. `contextkit add <name>` resolves names here; any git URL also works. Each module is its own git repository following the module contract (docs/modules.md).",
+  "$comment": "Registry of known contextkit sub-modules. `contextkit add <name>` resolves names here; any git URL also works. Each module is its own git repository following the module contract (docs/modules.md). Registration only reveals a module's name, source URL, and description — being listed here doesn't make a private repo clonable; `add` still needs real git access to `source`.",
   "modules": {
     "personal": {
+      "$comment": "Private repo, only clonable with Victor's own git credentials. Registered so `contextkit add personal` resolves by name from any of his machines; not usable by anyone else.",
       "source": "https://github.com/VictorYan1990/contextkit-personal.git",
       "ref": "main",
-      "description": "Victor's private profile and anything else too personal for the public kit (private repo — registered here for `add personal`, not for public use)"
+      "description": "Victor's private profile and preferences"
     }
   }
 }
