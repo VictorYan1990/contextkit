@@ -63,9 +63,20 @@ tag in `ref` only move when they choose to. Consumers that follow `main` move on
 
 ## Where the user profile lives
 
-Central ships `rules/USER.md` with its owner's non-sensitive profile, because
-the kit is single-user and public. If you fork the kit for someone else, replace
-it from `rules/USER.template.md`. If a profile must hold things that should not
-be public, put the fuller version in a private module's `rules/`; the
-consumer's managed block lists every installed module's rules, so the agent
-reads both.
+Central is public, so it never ships a filled-in profile — only the blank
+structure in `rules/USER.template.md`. The real one lives in a private module,
+named `personal` by convention:
+
+```bash
+npx github:VictorYan1990/contextkit new-module personal \
+  --dir ~/projects/contextkit-personal \
+  --description "My profile and anything else too personal for the public kit"
+```
+
+Copy `rules/USER.template.md` into that module as `rules/USER.md` and fill it
+in, push the module to a **private** repository, then register it (or skip the
+registry and `add` by URL — see above) and `contextkit add personal` in any
+repo where the agent should know who it's working with. The consumer's managed
+block lists every installed module's rules, so the agent reads `SOUL.md` and
+the private `USER.md` together, and the profile itself never enters a public
+git history.

@@ -52,10 +52,10 @@ Use symlinks, never junctions; see the `ai-layout` skill.
   Follow the `skill-authoring` skill.
 - **Personas.** kebab-case `name` == file name, a when-to-use `description`,
   optional `tools`. Domain-neutral in central.
-- **Rules.** Short and always-on. `rules/USER.md` is the owner's profile and
-  the only place personal facts belong; keep it free of anything sensitive,
-  because this repository is public. Skills, personas, and knowledge stay
-  person-neutral.
+- **Rules.** Short and always-on. Central ships only `rules/USER.template.md` —
+  a blank profile structure — never a filled-in one, because this repository is
+  public. A real profile belongs in a private module's `rules/USER.md`. Skills,
+  personas, and knowledge stay person-neutral.
 - **Knowledge.** One claim per file from `knowledge/_template.md`, dated, with
   evidence. Capture with `/capture-knowledge`.
 - **Never reference this repo's own paths or name from shipped content** except

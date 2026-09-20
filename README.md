@@ -1,5 +1,7 @@
 # contextkit
 
+[![ci](https://github.com/VictorYan1990/contextkit/actions/workflows/ci.yml/badge.svg)](https://github.com/VictorYan1990/contextkit/actions/workflows/ci.yml)
+
 Importable context infrastructure for AI coding agents.
 
 A repository's AI guidance tends to be rebuilt from scratch each time: the same
@@ -17,6 +19,29 @@ After that the repo has a gitignored `.contextkit/` clone, a committed
 `contextkit.json` pinning the exact commit, and relative symlinks that make the
 kit's skills and personas visible to Claude Code and Cursor at session start.
 Collaborators run `npx github:VictorYan1990/contextkit install` after cloning.
+
+## Is this repository for you?
+
+This is **Victor's personal kit**, published to show the pattern — versioned
+skills, personas, rules, and knowledge, wired into any repo with one command —
+not as something meant to be cloned wholesale. His own profile stays out of it
+entirely; see [`rules/USER.template.md`](rules/USER.template.md) and the
+private-module pattern in [`docs/modules.md`](docs/modules.md#where-the-user-profile-lives).
+
+Three ways to use it, cheapest first:
+
+1. **Install it as-is** if several of the shipped skills or personas
+   (`ai-layout`, `skill-authoring`, `code-reviewer`, `planner`, `tech-writer`, …)
+   are useful to you as they are — they're written domain-neutral on purpose.
+   Add anything of your own as project-owned files in `.agents/` per repo, or
+   your own private sub-module for things you use everywhere; you never touch
+   this repo. `eject`/`exclude` (below) handle the rest.
+2. **Fork it** if you want the same CLI and layout with your own skills,
+   personas, and rules replacing these — keep the installer, swap the content.
+3. **Build your own from scratch** if you'd rather not depend on this CLI at
+   all. The pattern — `AGENTS.md` + `skills/` + `personas/` + `rules/` +
+   `knowledge/`, wired with symlinks so tools discover it — is the actual idea;
+   this repository is one implementation of it.
 
 ## Workflow in a consumer repository
 
@@ -104,8 +129,14 @@ changes the managed clone and the next `update` discards it. Eject first.
 
 ## Requirements
 
-Node ≥ 18 and git on the consuming machine. On Windows, symlinks need Developer
-Mode and `git config core.symlinks true`; otherwise use `--mode copy`.
+Node ≥ 18 and git on the consuming machine.
+
+**Windows is not supported natively.** Symlink mode is only developed and
+tested on macOS/Linux, WSL included. On native Windows, either do your agent
+work from inside WSL, or pass `--mode copy` to install real file copies
+instead of symlinks — that also happens to make per-repo customization easier,
+at the cost of running `update` by hand when you want upstream changes merged
+in.
 
 ## Credits
 

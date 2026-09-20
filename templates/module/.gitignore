@@ -3,6 +3,5 @@
 *.local.json
 .cursor/mcp.json
 .ai/
-prompt.md
 node_modules/
 .DS_Store

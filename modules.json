@@ -1,10 +1,10 @@
 {
   "$comment": "Registry of known contextkit sub-modules. `contextkit add <name>` resolves names here; any git URL also works. Each module is its own git repository following the module contract (docs/modules.md).",
   "modules": {
-    "diet-knowledge": {
-      "source": "https://github.com/VictorYan1990/contextkit-diet-knowledge.git",
+    "personal": {
+      "source": "https://github.com/VictorYan1990/contextkit-personal.git",
       "ref": "main",
-      "description": "Nutrition and diet knowledge: how common macronutrients and sugars are metabolised, and what that means for practical dietary advice"
+      "description": "Victor's private profile and anything else too personal for the public kit (private repo — registered here for `add personal`, not for public use)"
     }
   }
 }
